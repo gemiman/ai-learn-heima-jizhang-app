@@ -67,6 +67,7 @@
 - **UI 组件库**：Element Plus
 - **图表库**：ECharts
 - **打包发布**：生成 Windows / macOS 安装包
+- **版本管理**：Git（本地存档 + GitHub 云端备份）
 
 ---
 
