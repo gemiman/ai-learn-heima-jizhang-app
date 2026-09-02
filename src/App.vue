@@ -16,7 +16,7 @@ function onSelect(index: string) {
 <template>
   <el-container class="app-shell">
     <el-aside width="200px" class="sidebar">
-      <div class="logo">🐴 黑马记账</div>
+      <div class="logo">记账APP</div>
       <el-menu :default-active="current" class="menu" @select="onSelect">
         <el-menu-item index="home">🏠 首页</el-menu-item>
         <el-menu-item index="add">✏️ 记一笔账</el-menu-item>
