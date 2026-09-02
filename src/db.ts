@@ -146,6 +146,48 @@ export async function addCategory(
   return r.lastInsertId ?? 0;
 }
 
+// 修改分类（名称/图标，仅限用户自定义分类，预置分类禁止修改）
+export async function updateCategory(id: number, name: string, icon: string | null): Promise<void> {
+  const db = await getDb();
+  const rows = await db.select<{ is_default: number }[]>(
+    'SELECT is_default FROM categories WHERE id = $1',
+    [id]
+  );
+  if (rows.length === 0) throw new Error('分类不存在');
+  if (rows[0].is_default === 1) throw new Error('预置分类不能修改');
+  await db.execute('UPDATE categories SET name = $1, icon = $2 WHERE id = $3', [name, icon, id]);
+}
+
+// 删除分类（仅限用户自定义、且无账单、且无子分类的分类）
+export async function deleteCategory(id: number): Promise<void> {
+  const db = await getDb();
+
+  const rows = await db.select<{ is_default: number; parent_id: number | null }[]>(
+    'SELECT is_default, parent_id FROM categories WHERE id = $1',
+    [id]
+  );
+  if (rows.length === 0) throw new Error('分类不存在');
+  if (rows[0].is_default === 1) throw new Error('预置分类不能删除');
+
+  // 一级大类：下面还有二级小类则禁止删除
+  if (rows[0].parent_id === null) {
+    const children = await db.select<{ c: number }[]>(
+      'SELECT COUNT(*) AS c FROM categories WHERE parent_id = $1',
+      [id]
+    );
+    if (children[0].c > 0) throw new Error('该大类下还有二级小类，请先删除小类');
+  }
+
+  // 还有账单引用则禁止删除
+  const tx = await db.select<{ c: number }[]>(
+    'SELECT COUNT(*) AS c FROM transactions WHERE category_id = $1',
+    [id]
+  );
+  if (tx[0].c > 0) throw new Error('该分类下还有账单，不能删除');
+
+  await db.execute('DELETE FROM categories WHERE id = $1', [id]);
+}
+
 // ===== 账单流水 =====
 
 // 记一笔账

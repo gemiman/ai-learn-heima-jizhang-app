@@ -13,3 +13,6 @@ src-tauri/target/
 .DS_Store
 Thumbs.db
 *.log
+
+# ===== Claude Code 本地设置（记录本机命令权限，含个人路径，不纳入存档）=====
+.claude/settings.local.json
