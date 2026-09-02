@@ -4,6 +4,14 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { listCategories, addCategory, updateCategory, deleteCategory } from "../db";
 import type { Category, CategoryTree, TxType } from "../types";
 
+// 预设分类图标（供用户点选，覆盖常见收支场景）
+const ICONS = [
+  "🍜", "🍔", "🍰", "☕", "🛒", "👕", "👟", "💄", "🍼", "🏠",
+  "💡", "🚗", "⛽", "🚌", "✈️", "🚄", "🎬", "🎮", "🏋️", "🐱",
+  "💊", "🏥", "📚", "✏️", "🎁", "🧧", "📱", "💻", "💰", "💵",
+  "📈", "💼", "✍️", "🏦", "🐾", "🌍",
+];
+
 const type = ref<TxType>("expense");
 const categories = ref<CategoryTree[]>([]);
 
@@ -31,6 +39,15 @@ function switchType(t: TxType) {
   load();
 }
 
+// 点选图标：再点一次取消选择
+function pickNewIcon(icon: string) {
+  newIcon.value = newIcon.value === icon ? "" : icon;
+}
+
+function pickRenameIcon(icon: string) {
+  renameIcon.value = renameIcon.value === icon ? "" : icon;
+}
+
 async function submitAdd() {
   const name = newName.value.trim();
   if (!name) {
@@ -38,7 +55,7 @@ async function submitAdd() {
     return;
   }
   const parentId = newParentId.value === -1 ? null : newParentId.value;
-  await addCategory(type.value, name, parentId, newIcon.value.trim() || null);
+  await addCategory(type.value, name, parentId, newIcon.value || null);
   ElMessage.success("添加成功");
   dialogVisible.value = false;
   newName.value = "";
@@ -61,7 +78,7 @@ async function submitRename() {
     return;
   }
   try {
-    await updateCategory(renameId.value, name, renameIcon.value.trim() || null);
+    await updateCategory(renameId.value, name, renameIcon.value || null);
     ElMessage.success("修改成功");
     renameVisible.value = false;
     await load();
@@ -140,7 +157,16 @@ async function confirmDelete(c: Category) {
           <el-input v-model="newName" placeholder="如：宠物" maxlength="10" />
         </el-form-item>
         <el-form-item label="图标">
-          <el-input v-model="newIcon" placeholder="选填，如：🐱" maxlength="4" />
+          <div class="icon-picker">
+            <span class="icon-item none" :class="{ active: newIcon === '' }" @click="newIcon = ''">无</span>
+            <span
+              v-for="icon in ICONS"
+              :key="icon"
+              class="icon-item"
+              :class="{ active: newIcon === icon }"
+              @click="pickNewIcon(icon)"
+            >{{ icon }}</span>
+          </div>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -150,13 +176,22 @@ async function confirmDelete(c: Category) {
     </el-dialog>
 
     <!-- 修改分类对话框 -->
-    <el-dialog v-model="renameVisible" title="修改分类" width="360px">
+    <el-dialog v-model="renameVisible" title="修改分类" width="440px">
       <el-form label-width="80px">
         <el-form-item label="名称">
           <el-input v-model="renameName" placeholder="请输入新名称" maxlength="10" />
         </el-form-item>
         <el-form-item label="图标">
-          <el-input v-model="renameIcon" placeholder="选填，如：🐱" maxlength="4" />
+          <div class="icon-picker">
+            <span class="icon-item none" :class="{ active: renameIcon === '' }" @click="renameIcon = ''">无</span>
+            <span
+              v-for="icon in ICONS"
+              :key="icon"
+              class="icon-item"
+              :class="{ active: renameIcon === icon }"
+              @click="pickRenameIcon(icon)"
+            >{{ icon }}</span>
+          </div>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -248,5 +283,41 @@ async function confirmDelete(c: Category) {
 
 .tag-op:hover {
   text-decoration: underline;
+}
+
+.icon-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.icon-item {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  border: 1px solid #dcdfe6;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #fff;
+  user-select: none;
+}
+
+.icon-item:hover {
+  border-color: #409eff;
+}
+
+.icon-item.active {
+  border-color: #409eff;
+  background: #ecf5ff;
+}
+
+.icon-item.none {
+  width: auto;
+  padding: 0 8px;
+  font-size: 13px;
+  color: #606266;
 }
 </style>
