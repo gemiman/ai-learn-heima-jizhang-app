@@ -7,8 +7,9 @@
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "vitest run --config vitest.config.ts",
+    "test:watch": "vitest --config vitest.config.ts",
+    "test:report": "vitest run --config vitest.config.ts --reporter=verbose",
     "tauri": "tauri"
   },
   "dependencies": {

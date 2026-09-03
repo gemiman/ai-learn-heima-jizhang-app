@@ -60,6 +60,7 @@ npm run tauri dev     # 开发模式运行
 npm run tauri build   # 打包成安装包（Windows 生成 .exe）
 npm test              # 运行全部单元测试（工具函数 + 数据库逻辑 + 页面组件）
 npm run test:watch    # 边改代码边自动重跑测试
+npm run test:report   # 跑测试并逐条列出每个用例的结果（出明细报告用）
 ```
 
 ### 测试覆盖范围
