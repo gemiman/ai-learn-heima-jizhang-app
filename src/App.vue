@@ -5,6 +5,7 @@ import AddView from "./views/AddView.vue";
 import ListView from "./views/ListView.vue";
 import CategoryView from "./views/CategoryView.vue";
 import StatisticsView from "./views/StatisticsView.vue";
+import SnakeGameView from "./views/SnakeGameView.vue";
 
 const current = ref("home");
 
@@ -23,6 +24,7 @@ function onSelect(index: string) {
         <el-menu-item index="list">📋 账单明细</el-menu-item>
         <el-menu-item index="stat">📊 统计分析</el-menu-item>
         <el-menu-item index="category">🗂 分类管理</el-menu-item>
+        <el-menu-item index="snake">🎮 小游戏</el-menu-item>
       </el-menu>
     </el-aside>
 
@@ -32,6 +34,7 @@ function onSelect(index: string) {
       <ListView v-else-if="current === 'list'" />
       <StatisticsView v-else-if="current === 'stat'" />
       <CategoryView v-else-if="current === 'category'" />
+      <SnakeGameView v-else-if="current === 'snake'" />
     </el-main>
   </el-container>
 </template>
