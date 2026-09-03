@@ -30,6 +30,7 @@
 | UI 组件库 | Element Plus |
 | 图表库 | ECharts |
 | 数据存储 | 本地 SQLite（tauri-plugin-sql） |
+| 单元测试 | Vitest |
 | 打包发布 | 生成 Windows / macOS 安装包 |
 
 ---
@@ -57,6 +58,7 @@ npm run tauri dev
 ```bash
 npm run tauri dev     # 开发模式运行
 npm run tauri build   # 打包成安装包（Windows 生成 .exe）
+npm test              # 运行单元测试
 ```
 
 ---
