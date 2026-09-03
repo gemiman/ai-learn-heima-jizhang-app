@@ -1,6 +1,7 @@
 // 数据访问层：负责和本地 SQLite 数据库打交道（建表、预置分类、增删查）
 import Database from '@tauri-apps/plugin-sql';
 import { shiftMonth } from './utils';
+import { buildMonthlyTrend, buildTransactionWhere, sumByType } from './db-logic';
 import type {
   Category,
   CategoryBreakdown,
@@ -202,21 +203,8 @@ export async function addTransaction(t: NewTransaction): Promise<void> {
 // 查询账单列表（按时间倒序），支持按类型/关键词/分类/月份筛选
 export async function listTransactions(filter: TransactionFilter = {}): Promise<TransactionView[]> {
   const db = await getDb();
-  const conditions: string[] = [];
-  const params: unknown[] = [];
 
-  // 依次添加筛选条件，并生成 $1、$2… 占位符
-  const add = (cond: string, val: unknown) => {
-    params.push(val);
-    conditions.push(cond.replace('?', `$${params.length}`));
-  };
-
-  if (filter.type) add('t.type = ?', filter.type);
-  if (filter.categoryId) add('t.category_id = ?', filter.categoryId);
-  if (filter.keyword) add('t.note LIKE ?', `%${filter.keyword}%`);
-  if (filter.month) add('t.date LIKE ?', `${filter.month}-%`);
-
-  const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+  const { where, params } = buildTransactionWhere(filter);
   const sql = `
     SELECT t.*, c.name AS category_name, c.icon AS category_icon, p.name AS parent_name
     FROM transactions t
@@ -235,16 +223,6 @@ export async function deleteTransaction(id: number): Promise<void> {
 }
 
 // ===== 统计 =====
-
-function sumByType(rows: { type: TxType; total: number }[]): { expense: number; income: number } {
-  let expense = 0;
-  let income = 0;
-  for (const r of rows) {
-    if (r.type === 'expense') expense = r.total;
-    else income = r.total;
-  }
-  return { expense, income };
-}
 
 // 首页结余：某月的支出/收入/结余 + 累计的支出/收入/结余
 export async function getSummary(month: string): Promise<Summary> {
@@ -279,14 +257,7 @@ export async function getMonthlyTrend(endMonth: string, months = 6): Promise<Mon
      GROUP BY month, type`,
     [startMonth, endMonth]
   );
-  const result: MonthlyTrend[] = [];
-  for (let i = 0; i < months; i++) {
-    const m = shiftMonth(startMonth, i);
-    const expense = rows.find((r) => r.month === m && r.type === 'expense')?.total ?? 0;
-    const income = rows.find((r) => r.month === m && r.type === 'income')?.total ?? 0;
-    result.push({ month: m, expense, income, balance: income - expense });
-  }
-  return result;
+  return buildMonthlyTrend(startMonth, months, rows);
 }
 
 // 某月某类型下，各一级大类的金额汇总（用于占比饼图）

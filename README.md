@@ -30,7 +30,7 @@
 | UI 组件库 | Element Plus |
 | 图表库 | ECharts |
 | 数据存储 | 本地 SQLite（tauri-plugin-sql） |
-| 单元测试 | Vitest |
+| 单元测试 | Vitest + @vue/test-utils + jsdom（纯函数 + 数据库逻辑 + 页面组件） |
 | 打包发布 | 生成 Windows / macOS 安装包 |
 
 ---
@@ -58,8 +58,21 @@ npm run tauri dev
 ```bash
 npm run tauri dev     # 开发模式运行
 npm run tauri build   # 打包成安装包（Windows 生成 .exe）
-npm test              # 运行单元测试
+npm test              # 运行全部单元测试（工具函数 + 数据库逻辑 + 页面组件）
+npm run test:watch    # 边改代码边自动重跑测试
 ```
+
+### 测试覆盖范围
+
+测试分三层，共覆盖 35 个用例：
+
+| 层级 | 覆盖内容 | 测试文件 |
+|------|---------|---------|
+| 工具函数 | 金额换算、日期加减 | `src/utils.test.ts` |
+| 数据库逻辑 | 收支汇总、筛选条件拼接、月份补齐 | `src/db-logic.test.ts` |
+| 页面组件 | 记账校验、账单显示、删除确认、分类新增、菜单切换等 | `src/**/*.test.ts`（views 下） |
+
+> 页面组件的图表和贪吃蛇画面在测试环境用「假对象」替代，只测行为逻辑，不测视觉渲染。
 
 ---
 
