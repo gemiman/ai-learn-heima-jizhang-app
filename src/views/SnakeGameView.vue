@@ -81,6 +81,24 @@ function reset() {
   draw();
 }
 
+// 画圆角矩形（Canvas 原生 roundRect 的兼容封装，避免依赖浏览器版本）
+function roundRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number
+) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
 // 画布绘制（每次状态变化后重画一帧）
 function draw() {
   const canvas = canvasRef.value;
@@ -113,10 +131,49 @@ function draw() {
   ctx.arc(food.x * CELL + CELL / 2, food.y * CELL + CELL / 2, CELL / 2 - 3, 0, Math.PI * 2);
   ctx.fill();
 
-  // 蛇身（蛇头深绿、身体浅绿）
+  // 蛇身（蛇头圆润 + 眼睛，身体浅绿圆角）
   snake.forEach((seg, i) => {
-    ctx.fillStyle = i === 0 ? "#67c23a" : "#95d475";
-    ctx.fillRect(seg.x * CELL + 1, seg.y * CELL + 1, CELL - 2, CELL - 2);
+    const x = seg.x * CELL;
+    const y = seg.y * CELL;
+    if (i === 0) {
+      // 蛇头：圆角方块 + 两只朝向前进方向的眼睛
+      ctx.fillStyle = "#67c23a";
+      roundRect(ctx, x + 1, y + 1, CELL - 2, CELL - 2, 8);
+      ctx.fill();
+
+      const d = DIRS[direction];
+      const cx = x + CELL / 2;
+      const cy = y + CELL / 2;
+      const fwd = CELL * 0.16; // 眼睛沿前进方向前移
+      const spread = CELL * 0.2; // 两只眼睛的间距
+      const ex1 = cx + d.x * fwd - d.y * spread;
+      const ey1 = cy + d.y * fwd + d.x * spread;
+      const ex2 = cx + d.x * fwd + d.y * spread;
+      const ey2 = cy + d.y * fwd - d.x * spread;
+
+      // 眼白
+      ctx.fillStyle = "#fff";
+      ctx.beginPath();
+      ctx.arc(ex1, ey1, CELL * 0.13, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(ex2, ey2, CELL * 0.13, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 瞳孔
+      ctx.fillStyle = "#1a1a1a";
+      ctx.beginPath();
+      ctx.arc(ex1, ey1, CELL * 0.06, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(ex2, ey2, CELL * 0.06, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      // 身体：浅绿圆角方块
+      ctx.fillStyle = "#95d475";
+      roundRect(ctx, x + 1, y + 1, CELL - 2, CELL - 2, 5);
+      ctx.fill();
+    }
   });
 
   // 游戏结束遮罩
