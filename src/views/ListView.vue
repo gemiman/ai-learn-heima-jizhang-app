@@ -10,6 +10,7 @@ const type = ref<TxType | "">("");
 const month = ref("");
 const keyword = ref("");
 
+// 按当前筛选条件（类型/月份/关键词）重新查询账单列表；空值转 undefined 表示「不筛选这一项」
 async function load() {
   rows.value = await listTransactions({
     type: type.value || undefined,

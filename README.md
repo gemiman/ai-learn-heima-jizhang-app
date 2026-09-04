@@ -117,6 +117,31 @@ src-tauri/target/release/bundle/nsis/记账APP_0.1.0_x64-setup.exe
 
 ---
 
+## 🚦 提交前门禁（Commit Gate）
+
+项目配了「提交前门禁」：**每次 `git commit` 之前，会自动检查「单元测试」和「质量检查」是否都通过，都通过才允许存档，否则拒绝提交。**
+
+### 怎么提交
+
+对 Claude 说「提交」或「commit」，会自动触发 `gitcommit-agent`：
+1. 并行跑一遍单元测试（app-tester）和质量检查（quality-engineer）；
+2. 两个都通过 → 自动存档并推送；
+3. 任一不通过 → 拒绝提交，并告诉你哪里没过。
+
+### 手动提交会被拦
+
+如果你自己在终端里直接 `git commit`，会看到「❌ 提交被拦截」的提示——这是正常的，说明还没跑门禁。想提交就走上面的门禁流程。
+
+### 换电脑 / 重新克隆后
+
+钩子脚本在仓库里（`.githooks/`），但需要一次性让 git 认它（本机配置，不随仓库走）：
+
+```bash
+git config core.hooksPath .githooks
+```
+
+---
+
 ## 🗺 开发路线图
 
 | 阶段 | 目标 | 状态 |

@@ -25,3 +25,16 @@ skills:
 - 组件测试用「假浏览器」jsdom，测试文件顶部有 `// @vitest-environment jsdom`。
 - 组件测试里数据库用 `vi.mock` 假数据替换，图表（ECharts）和贪吃蛇画面（Canvas）用假对象替代，只测行为不测画面。
 - 公共补丁（ResizeObserver、matchMedia）在 `test-setup.ts`，别误删。
+
+## 写门禁标记（提交门禁用）
+
+跑完测试后，务必写一个标记文件，供提交门禁（git pre-commit 钩子）读取：
+
+- 全部测试通过（0 失败）→ 写 `.git/quality-gates/tests.status`，内容 `pass`。
+- 有任何失败或命令报错 → 写 `.git/quality-gates/tests.status`，内容 `fail`。
+
+写法（任选其一）：
+- 用 Bash：`mkdir -p .git/quality-gates && echo pass > .git/quality-gates/tests.status`（失败时把 pass 换成 fail）。
+- 用 Write 工具直接写这个文件。
+
+这一步不能省，即使没人要求也要写。

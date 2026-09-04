@@ -8,6 +8,7 @@ const month = currentMonth();
 const summary = ref<Summary | null>(null);
 const recent = ref<TransactionView[]>([]);
 
+// 加载首页数据：本月/累计的结余统计 + 最近 5 笔账单
 async function load() {
   summary.value = await getSummary(month);
   recent.value = (await listTransactions({})).slice(0, 5);

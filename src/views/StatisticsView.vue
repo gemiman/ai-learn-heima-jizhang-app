@@ -92,6 +92,7 @@ function renderPie(chart: ECharts | null, data: CategoryBreakdown[], type: TxTyp
   );
 }
 
+// 加载统计数据：近 6 个月趋势 + 本月支出/收入占比，然后画到三个图表上
 async function load() {
   const trend = await getMonthlyTrend(month.value, 6);
   const expense = await getCategoryBreakdown(month.value, "expense");
